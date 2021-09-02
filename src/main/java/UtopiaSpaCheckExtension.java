@@ -7,10 +7,13 @@ import utils.DestinationUtil;
 import javax.annotation.Nonnull;
 import java.io.File;
 
+/**
+ * @author Utopia
+ */
 public class UtopiaSpaCheckExtension {
 
     @Nonnull
-    private final CheckStyleOptions checkStyle = new CheckStyleOptions();
+    private final CheckStyleOptions checkStyle;
 
     @Nonnull
     private final FindBugsOptions findBugs;
@@ -18,8 +21,11 @@ public class UtopiaSpaCheckExtension {
     @Nonnull
     private final PmdOptions pmd;
 
-    @Nonnull
-    private final CoverageReportOptions coverageReport;
+    public UtopiaSpaCheckExtension(@Nonnull CheckStyleOptions checkStyle, @Nonnull FindBugsOptions findBugs, @Nonnull PmdOptions pmd) {
+        this.checkStyle = checkStyle;
+        this.findBugs = findBugs;
+        this.pmd = pmd;
+    }
 
 
     private class CheckStyleOptions extends CheckstyleExtension {
@@ -38,31 +44,99 @@ public class UtopiaSpaCheckExtension {
             helper.setDestination(destination);
         }
 
+        @Nonnull
+        File getHtmlFile(){
+            return helper.htmlFile;
+        }
+
+        void setExclude(String... exclude){
+            helper.exclude = exclude;
+        }
+
+        @Nonnull
+        String[] getExclude(){
+            return helper.exclude;
+        }
     }
 
     private class FindBugsOptions extends FindBugsExtension {
+
+        boolean enabled = true;
+
+        boolean reportHtml = true;
+        boolean reportXml = false;
+
+        @Nonnull
+        private final CommonHelper helper;
+
         public FindBugsOptions(Project project) {
             super(project);
+            helper = new CommonHelper(project, "findbugs");
+        }
+
+        void setDestination(File destination){
+            helper.setDestination(destination);
+        }
+
+        @Nonnull
+        File getHtmlFile(){
+            return helper.htmlFile;
+        }
+
+        @Nonnull
+        File getXmlFile(){
+            return helper.xmlFile;
+        }
+
+        void setExclude(String... exclude){
+            helper.exclude = exclude;
+        }
+
+        @Nonnull
+        String[] getExclude(){
+            return helper.exclude;
         }
     }
 
 
     private class PmdOptions extends PmdExtension {
+
+        boolean enabled = true;
+
+        @Nonnull
+        private final CommonHelper helper;
+
         public PmdOptions(Project project) {
             super(project);
+            helper = new CommonHelper(project, "pmd");
+        }
+
+        @Nonnull
+        File getHtmlFile(){
+            return helper.htmlFile;
+        }
+
+        void setExclude(String... exclude){
+            helper.exclude = exclude;
+        }
+
+        @Nonnull
+        String[] getExclude(){
+            return helper.exclude;
         }
     }
 
-
-    private class CoverageReportOptions {
-    }
-
     private class CommonHelper{
+        @Nonnull
         private final String name;
+        @Nonnull
         private final Project project;
+        @Nonnull
         File htmlFile;
+        @Nonnull
         File xmlFile;
-        String[] exclude = [];
+        @Nonnull
+        String[] exclude = {};
 
         CommonHelper(Project project, String name){
             this.project = project;
